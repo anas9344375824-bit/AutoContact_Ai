@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSV to Mobile Contacts Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-100">
+    <main class="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-12">
+      <section class="rounded-3xl border border-slate-800 bg-slate-900/60 p-8 shadow-2xl">
+        <div class="flex flex-col gap-4">
+          <p class="text-sm uppercase tracking-[0.3em] text-cyan-300/70">
+            CSV to Mobile Contacts AI
+          </p>
+          <h1 class="text-3xl font-semibold text-slate-50 md:text-4xl">
+            CSV to Mobile Contacts Converter
+          </h1>
+          <p class="text-slate-300">
+            Upload your CSV, preview the first 10 contacts, and generate a clean
+            VCF file ready to import on mobile.
+          </p>
+        </div>
+      </section>
+
+      <section
+        id="dropZone"
+        class="drop-zone flex flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-slate-700 bg-slate-900/40 p-10 text-center"
+      >
+        <input
+          id="fileInput"
+          class="hidden"
+          type="file"
+          accept=".csv,text/csv"
+        />
+        <div class="text-lg font-semibold text-slate-100">
+          Drag & drop your CSV file
+        </div>
+        <p class="text-sm text-slate-400">or click to browse</p>
+        <button
+          id="browseBtn"
+          class="rounded-full border border-cyan-300/50 px-5 py-2 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-300/10"
+          type="button"
+        >
+          Browse Files
+        </button>
+        <p id="fileName" class="text-sm text-slate-400"></p>
+      </section>
+
+      <section class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <div class="rounded-3xl border border-slate-800 bg-slate-900/50 p-6">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold">Preview (first 10)</h2>
+            <span id="detectedColumns" class="text-xs text-slate-400"></span>
+          </div>
+          <div class="mt-4 overflow-hidden rounded-2xl border border-slate-800">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-900 text-slate-300">
+                <tr>
+                  <th class="px-4 py-3">Name</th>
+                  <th class="px-4 py-3">Phone</th>
+                </tr>
+              </thead>
+              <tbody id="previewBody" class="bg-slate-950/40 text-slate-200">
+                <tr>
+                  <td class="px-4 py-3 text-slate-500" colspan="2">
+                    Upload a CSV to see a preview.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-3 text-xs text-slate-400">
+            <span id="rowCount">Rows: 0</span>
+            <span id="usableCount">Usable contacts: 0</span>
+            <span id="duplicateCount">Duplicates removed: 0</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-4 rounded-3xl border border-slate-800 bg-slate-900/50 p-6">
+          <h2 class="text-xl font-semibold">Actions</h2>
+          <p class="text-sm text-slate-400">
+            Smart detection looks for columns like name, phone, mobile, or
+            number. We also clean phone numbers and remove duplicates.
+          </p>
+          <button
+            id="convertBtn"
+            class="rounded-xl bg-cyan-400/90 px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
+            disabled
+          >
+            Convert to VCF
+          </button>
+          <button
+            id="downloadBtn"
+            class="rounded-xl border border-slate-700 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-300/60 hover:text-cyan-200 disabled:cursor-not-allowed disabled:border-slate-800 disabled:text-slate-500"
+            disabled
+          >
+            Download contacts.vcf
+          </button>
+          <div
+            id="status"
+            class="min-h-[24px] rounded-lg bg-slate-950/60 px-3 py-2 text-xs text-slate-300"
+          ></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

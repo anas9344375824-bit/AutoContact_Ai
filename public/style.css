@@ -1,0 +1,8 @@
+﻿.drop-zone {
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.drop-zone.is-dragover {
+  border-color: #22d3ee;
+  background: rgba(8, 145, 178, 0.1);
+}
