@@ -4,6 +4,7 @@ const multer = require('multer');
 const {
   detectColumns,
   parseCsvBuffer,
+  parseExcelBuffer,
   buildContacts,
   dedupeContacts,
   generateVcf
@@ -19,12 +20,35 @@ const publicDir = path.resolve(__dirname, '..', 'public');
 // Serve the static frontend.
 app.use(express.static(publicDir));
 
+const EXCEL_EXTENSIONS = new Set(['.xlsx', '.xlsm', '.xltx', '.xls']);
+const EXCEL_MIME_TYPES = new Set([
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel',
+  'application/vnd.ms-excel.sheet.macroEnabled.12',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.template'
+]);
+
+function parseFile(file) {
+  const extension = path.extname(file.originalname || '').toLowerCase();
+  const mimeType = String(file.mimetype || '').toLowerCase();
+
+  if (EXCEL_EXTENSIONS.has(extension) || EXCEL_MIME_TYPES.has(mimeType)) {
+    return parseExcelBuffer(file.buffer);
+  }
+
+  if (extension === '.csv' || extension === '.txt' || mimeType.includes('csv')) {
+    return parseCsvBuffer(file.buffer);
+  }
+
+  throw new Error('Unsupported file type. Please upload a CSV or Excel file.');
+}
+
 // Shared pipeline used by both preview and conversion.
-function buildContactsFromFile(fileBuffer) {
-  const { data, headers } = parseCsvBuffer(fileBuffer);
+function buildContactsFromFile(file) {
+  const { data, headers } = parseFile(file);
 
   if (!headers.length) {
-    throw new Error('CSV headers are missing. Please include a header row.');
+    throw new Error('Header row is missing. Please include column names.');
   }
 
   const { nameCol, phoneCol } = detectColumns(headers);
@@ -51,7 +75,7 @@ function buildContactsFromFile(fileBuffer) {
 app.post('/api/preview', upload.single('file'), (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'Please upload a CSV file.' });
+      return res.status(400).json({ error: 'Please upload a CSV or Excel file.' });
     }
 
     const {
@@ -60,7 +84,7 @@ app.post('/api/preview', upload.single('file'), (req, res) => {
       nameCol,
       phoneCol,
       totalRows
-    } = buildContactsFromFile(req.file.buffer);
+    } = buildContactsFromFile(req.file);
 
     return res.json({
       detected: { nameCol, phoneCol },
@@ -78,10 +102,10 @@ app.post('/api/preview', upload.single('file'), (req, res) => {
 app.post('/api/convert', upload.single('file'), (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'Please upload a CSV file.' });
+      return res.status(400).json({ error: 'Please upload a CSV or Excel file.' });
     }
 
-    const { contacts } = buildContactsFromFile(req.file.buffer);
+    const { contacts } = buildContactsFromFile(req.file);
 
     if (!contacts.length) {
       return res

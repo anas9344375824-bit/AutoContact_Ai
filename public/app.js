@@ -11,6 +11,16 @@ const convertBtn = document.getElementById('convertBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 const statusEl = document.getElementById('status');
 
+const ALLOWED_EXTENSIONS = ['.csv', '.txt', '.xlsx', '.xlsm', '.xltx', '.xls'];
+const ALLOWED_MIME_TYPES = [
+  'text/csv',
+  'application/csv',
+  'application/vnd.ms-excel',
+  'application/vnd.ms-excel.sheet.macroEnabled.12',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.template'
+];
+
 let currentFile = null;
 let vcfBlobUrl = null;
 
@@ -42,7 +52,7 @@ function resetPreview() {
   previewBody.innerHTML = `
     <tr>
       <td class="px-4 py-3 text-slate-500" colspan="2">
-        Upload a CSV to see a preview.
+        Upload a file to see a preview.
       </td>
     </tr>
   `;
@@ -54,10 +64,19 @@ function resetPreview() {
   resetDownload();
 }
 
-function isCsvFile(file) {
+function getExtension(filename) {
+  if (!filename) return '';
+  const index = filename.lastIndexOf('.');
+  if (index === -1) return '';
+  return filename.slice(index).toLowerCase();
+}
+
+function isSupportedFile(file) {
   if (!file) return false;
-  const name = file.name.toLowerCase();
-  return name.endsWith('.csv') || file.type.includes('csv');
+  const extension = getExtension(file.name);
+  if (ALLOWED_EXTENSIONS.includes(extension)) return true;
+  if (!file.type) return false;
+  return ALLOWED_MIME_TYPES.includes(file.type.toLowerCase());
 }
 
 // Ask the backend to parse and preview the first 10 contacts.
@@ -65,7 +84,7 @@ async function requestPreview(file) {
   const formData = new FormData();
   formData.append('file', file);
 
-  setStatus('Analyzing CSV and detecting columns...');
+  setStatus('Analyzing file and detecting columns...');
   convertBtn.disabled = true;
   resetDownload();
 
@@ -161,8 +180,8 @@ function triggerDownload() {
 }
 
 function handleFile(file) {
-  if (!isCsvFile(file)) {
-    setStatus('Please upload a valid .csv file.', true);
+  if (!isSupportedFile(file)) {
+    setStatus('Please upload a CSV or Excel file.', true);
     resetPreview();
     currentFile = null;
     fileName.textContent = '';
@@ -205,4 +224,4 @@ dropZone.addEventListener('drop', (event) => {
 });
 
 resetPreview();
-setStatus('Ready for a CSV file.');
+setStatus('Ready for a CSV or Excel file.');

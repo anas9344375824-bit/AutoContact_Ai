@@ -18,8 +18,7 @@
             CSV to Mobile Contacts Converter
           </h1>
           <p class="text-slate-300">
-            Upload your CSV, preview the first 10 contacts, and generate a clean
-            VCF file ready to import on mobile.
+            Upload your CSV or Excel, preview the first 10 contacts, and generate a clean VCF file ready to import on mobile.
           </p>
         </div>
       </section>
@@ -32,10 +31,10 @@
           id="fileInput"
           class="hidden"
           type="file"
-          accept=".csv,.txt,text/csv,application/csv,application/vnd.ms-excel"
+          accept=".csv,.txt,.xlsx,.xlsm,.xltx,.xls,text/csv,application/csv,application/vnd.ms-excel,application/vnd.ms-excel.sheet.macroEnabled.12,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.spreadsheetml.template"
         />
         <div class="text-lg font-semibold text-slate-100">
-          Drag & drop your CSV file
+          Drag & drop your CSV or Excel file
         </div>
         <p class="text-sm text-slate-400">or click to browse</p>
         <button
@@ -65,7 +64,7 @@
               <tbody id="previewBody" class="bg-slate-950/40 text-slate-200">
                 <tr>
                   <td class="px-4 py-3 text-slate-500" colspan="2">
-                    Upload a CSV to see a preview.
+                    Upload a CSV or Excel file to see a preview.
                   </td>
                 </tr>
               </tbody>
@@ -81,8 +80,7 @@
         <div class="flex flex-col gap-4 rounded-3xl border border-slate-800 bg-slate-900/50 p-6">
           <h2 class="text-xl font-semibold">Actions</h2>
           <p class="text-sm text-slate-400">
-            Smart detection looks for columns like name, phone, mobile, or
-            number. We also clean phone numbers and remove duplicates.
+            Smart detection looks for columns like name, phone, mobile, or number. We also clean phone numbers and remove duplicates.
           </p>
           <button
             id="convertBtn"

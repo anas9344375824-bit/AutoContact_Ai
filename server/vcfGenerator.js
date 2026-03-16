@@ -1,4 +1,5 @@
 ﻿const Papa = require('papaparse');
+const XLSX = require('xlsx');
 
 const NAME_KEYWORDS = ['name', 'fullname', 'person'];
 const PHONE_KEYWORDS = ['phone', 'mobile', 'number', 'contact', 'cell', 'tel'];
@@ -73,6 +74,46 @@ function parseCsvBuffer(buffer) {
   return { data: result.data || [], headers };
 }
 
+// Parse Excel files (xlsx/xlsm/xltx/xls) into rows + headers.
+function parseExcelBuffer(buffer) {
+  const workbook = XLSX.read(buffer, { type: 'buffer' });
+  const sheetName = workbook.SheetNames[0];
+
+  if (!sheetName) {
+    return { data: [], headers: [] };
+  }
+
+  const worksheet = workbook.Sheets[sheetName];
+  const rows = XLSX.utils.sheet_to_json(worksheet, {
+    header: 1,
+    defval: '',
+    raw: false
+  });
+
+  if (!rows.length) {
+    return { data: [], headers: [] };
+  }
+
+  const headers = rows[0].map((header, index) => {
+    const trimmed = String(header || '').trim();
+    return trimmed || `Column${index + 1}`;
+  });
+
+  const data = rows.slice(1)
+    .map((row) => {
+      const obj = {};
+      headers.forEach((header, index) => {
+        obj[header] = row[index] ?? '';
+      });
+      return obj;
+    })
+    .filter((row) =>
+      headers.some((header) => String(row[header] ?? '').trim() !== '')
+    );
+
+  return { data, headers };
+}
+
 // Clean phone numbers by keeping digits and a leading +.
 function cleanPhone(value) {
   if (!value) return '';
@@ -102,7 +143,7 @@ function escapeVcardValue(value) {
     .replace(/,/g, '\\,');
 }
 
-// Build contact objects from CSV rows.
+// Build contact objects from CSV/Excel rows.
 function buildContacts(rows, nameCol, phoneCol) {
   const contacts = [];
 
@@ -157,6 +198,7 @@ function generateVcf(contacts) {
 module.exports = {
   detectColumns,
   parseCsvBuffer,
+  parseExcelBuffer,
   buildContacts,
   dedupeContacts,
   generateVcf
